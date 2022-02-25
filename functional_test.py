@@ -1,3 +1,4 @@
+# 기능 테스트를 담고 있는 파일.
 from selenium import webdriver
 import unittest
 
@@ -11,7 +12,7 @@ class NewVisitorTest(unittest.TestCase):
 
     def test_can_start_a_list_and_retrieve_it_later(self):
         self.browser.get('http://localhost:8000')  # runserver를 하지 않으면 이 지점에서 에러가 발생함.
-        self.assertIn('TO-Do', self.browser.title)
+        self.assertIn('To-Do', self.browser.title)
         self.fail('Finish the test')
 
         # assert 'Django' in browser.title  # 현재의 스타팅 페이지 타이틀에는 Django가 들어있지 않아 아래와 같이 테스트를 진행함.
