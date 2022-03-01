@@ -1,9 +1,9 @@
 # 기능 테스트를 담고 있는 파일.
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import unittest
+from django.test import LiveServerTestCase
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Chrome()  # source ~/.bash_profile을 해주지 않으면 다음 에러 발생. selenium.common.exceptions.WebDriverException: Message: 'chromedriver' executable needs to be in PATH.
         self.browser.implicitly_wait(3)  # 암묵적 대기
@@ -17,7 +17,7 @@ class NewVisitorTest(unittest.TestCase):
         self.assertIn(row_text, [row.text for row in rows])
 
     def test_can_start_a_list_and_retrieve_it_later(self):
-        self.browser.get('http://localhost:8000')  # runserver를 하지 않으면 이 지점에서 에러가 발생함.
+        self.browser.get(self.live_server_url)  # runserver를 하지 않으면 이 지점에서 에러가 발생함.
 
         # 웹 페이지 타이틀과 헤더가 'To-Do'를 표시하고 있음
         self.assertIn('To-Do', self.browser.title)
@@ -33,6 +33,8 @@ class NewVisitorTest(unittest.TestCase):
 
         # "공작깃털 사기"라고 텍스트 상자에 입력
         inputbox.send_keys('공작깃털 사기')
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, '/lists/.+')
         # 엔터키를 치면 페이지가 갱신되고 작업 목록에 "1: 공작깃털 사기" 아이템이 추가됨.
         inputbox.send_keys(Keys.ENTER)
 
@@ -46,13 +48,31 @@ class NewVisitorTest(unittest.TestCase):
         self.check_for_row_in_list_table('1: 공작깃털 사기')
         self.check_for_row_in_list_table('2: 공작깃털을 이용해서 그물 만들기')
 
+        ## 새로운 사용자인 프란시스가 사이트에 접속
+        ## 새로운 브라우저 세션을 이용해서 에디스의 정보가 쿠키를 통해 유입되는 것을 방지. 이중#은 메타 주석. 테스트가 어떻게 동작하는지 설명하기 위해 사용.
+        self.browser.quit()
+        self.browser = webdriver.Chrome()
+
+        # 프란시스가 홈페이지에 접속한다
+        # 에디스의 리스트는 보이지 않음.
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('공작깃털 사기', page_text)
+        self.assertNotIn('그물 만들기', page_text)
+
+        # 프란시스가 새로운 아이템을 입력하기 시작.
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('우유 사기')
+        inputbox.send_keys(Keys.ENTER)
+
+        # 프란시스가 전용 url을 취득
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, '/lists/.+')
+        self.assertNotEqual(francis_list_url, edith_list_url)
+
+        # 에디스가 입력한 흔적이 없다는 것을 다시 확인
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('공작깃털 사기', page_text)
+        self.assertIn('우유 사기', page_text)
+
         self.fail('Finish the test')
-
-
-
-        # assert 'Django' in browser.title  # 현재의 스타팅 페이지 타이틀에는 Django가 들어있지 않아 아래와 같이 테스트를 진행함.
-        # assert 'congratulation' in browser.title.lower(), f"Browser title was {browser.title}"
-
-
-if __name__ == '__main__':
-    unittest.main(warnings='ignore')
