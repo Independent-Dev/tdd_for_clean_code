@@ -33,10 +33,10 @@ class NewVisitorTest(LiveServerTestCase):
 
         # "공작깃털 사기"라고 텍스트 상자에 입력
         inputbox.send_keys('공작깃털 사기')
+        inputbox.send_keys(Keys.ENTER)
         edith_list_url = self.browser.current_url
         self.assertRegex(edith_list_url, '/lists/.+')
         # 엔터키를 치면 페이지가 갱신되고 작업 목록에 "1: 공작깃털 사기" 아이템이 추가됨.
-        inputbox.send_keys(Keys.ENTER)
 
         # 추가 아이템을 입력할 수 있는 여분의 텍스트 상자가 존재
         # 다시 "공작깃털을 이용해서 그물 만들기"라고 입력한다
