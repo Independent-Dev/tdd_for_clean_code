@@ -1,24 +1,21 @@
+from django.http import HttpRequest
+from django.template.loader import render_to_string
 from django.test import TestCase
 from django.urls import resolve
 from django.utils.html import escape
 from list.models import Item, List
 from list.views import home_page
+from list.forms import ItemForm
 
 
 class HomePageTest(TestCase):
-    def test_root_url_resolves_to_home_page_view(self):
-        found = resolve('/')
-        self.assertEqual(found.func, home_page)
+    def test_home_page_renders_home_template(self):
+        response = self.client.get('/')
+        self.assertTemplateUsed(response, 'home.html')
 
-    # 뷰를 위한 테스트를 작성할 때는 단순히 빈 함수를 작성하는 것이 아니라 HTML 형식의 실제 응답을 반환하는 함수를 작성해야 한다.
-    # TODO 이 테스트는 문제가 있다... 나중에 고치던가 해야함.
-    # def test_home_page_returns_correct_html(self):
-    #     request = HttpRequest()
-    #     response = home_page(request)
-    #     expected_html = render_to_string('home.html', request=request)
-    #     print(response.content.decode())
-    #     print(expected_html)
-    #     self.assertEqual(response.content.decode(), expected_html)
+    def test_home_page_uses_item_form(self):
+        response = self.client.get('/')
+        self.assertTemplateUsed(response.context['form'], ItemForm)
 
 
 class ListViewTest(TestCase):
