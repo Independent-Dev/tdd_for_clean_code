@@ -10,3 +10,12 @@ class List(models.Model):
 class Item(models.Model):
     text = models.TextField(default='')
     list = models.ForeignKey(List, on_delete=models.CASCADE, default=None)
+    # 252페이지에는  list = models.ForeignKey(List, default=None)로 나와 있음.
+
+    def __str__(self):
+        return self.text
+
+    class Meta:
+        ordering = ('id', )
+        unique_together = ('list', 'text')
+
